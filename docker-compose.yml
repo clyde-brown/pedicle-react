@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # 프로덕션용 서비스
+  pedicle-react:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    container_name: pedicle-react-prod
+
+  # 개발용 서비스
+  pedicle-react-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3001:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    stdin_open: true
+    tty: true
+    container_name: pedicle-react-dev
+    profiles:
+      - dev
