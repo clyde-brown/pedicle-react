@@ -837,6 +837,194 @@
   }
 }
 
+/* 계층형 해부학적 부위 선택 스타일 */
+.disease-change-notification {
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification-icon {
+  font-size: 16px;
+}
+
+.notification-text {
+  font-size: 13px;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.anatomical-main-header,
+.anatomical-sub-header,
+.anatomical-subsub-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.anatomical-main-header:hover,
+.anatomical-sub-header:hover,
+.anatomical-subsub-header:hover {
+  background-color: #f5f5f5;
+}
+
+.toggle-icon {
+  font-size: 12px;
+  color: #666;
+  min-width: 16px;
+  text-align: center;
+}
+
+.anatomical-main-header h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.anatomical-sub-header h5 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #34495e;
+}
+
+.anatomical-subsub-header h6 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #5a6c7d;
+}
+
+.anatomical-main-content,
+.anatomical-sub-content,
+.anatomical-subsub-content {
+  padding-left: 24px;
+  margin-top: 4px;
+}
+
+.anatomical-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  margin: 2px 0;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.anatomical-item:hover {
+  background-color: #f8f9fa;
+}
+
+.anatomical-item input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.anatomical-label {
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+}
+
+.selected-anatomy-summary {
+  margin-top: 16px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.selected-anatomy-summary h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.selected-anatomy-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.anatomy-tag {
+  background: #3498db;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.remove-anatomy-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.remove-anatomy-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* 실시간 차팅 해부학적 부위 스타일 */
+.chart-anatomy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.chart-anatomy-item {
+  background: #e8f4f8;
+  color: #2980b9;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.disease-code {
+  font-size: 12px;
+  color: #7f8c8d;
+  margin: 2px 0 0 0;
+  font-weight: bold;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 8px;
@@ -852,6 +1040,167 @@
   }
 
   .treatment-types {
+    flex-direction: column;
+  }
+
+  .anatomical-main-content,
+  .anatomical-sub-content,
+  .anatomical-subsub-content {
+    padding-left: 16px;
+  }
+}
+
+/* 치료 방법 스타일 */
+.chart-treatment {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.chart-treatment-item {
+  background: #f0f8e8;
+  color: #27ae60;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.treatment-label {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* 미리보기 모달 */
+.preview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.preview-content {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e9ecef;
+  background: #f8f9fa;
+  border-radius: 8px 8px 0 0;
+}
+
+.preview-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #7f8c8d;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background: #e9ecef;
+  color: #2c3e50;
+}
+
+.preview-body {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  max-height: 50vh;
+}
+
+.preview-body pre {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #2c3e50;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.preview-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+  border-radius: 0 0 8px 8px;
+}
+
+.preview-footer button {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.preview-footer button:first-child {
+  color: #6c757d;
+}
+
+.preview-footer button:last-child {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.preview-footer button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .preview-content {
+    width: 95%;
+    margin: 10px;
+  }
+
+  .preview-body {
+    max-height: 40vh;
+  }
+
+  .preview-footer {
     flex-direction: column;
   }
 }

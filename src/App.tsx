@@ -78,22 +78,59 @@ const mockDermatomeMapping: Record<string, string[]> = {
 };
 
 const mockDiseases = [
-  { code: 'M51.1', name: '요추 추간판 탈출증', dermatomes: ['L4', 'L5', 'S1'] },
-  { code: 'M54.5', name: '요통', dermatomes: ['L1', 'L2', 'L3'] },
-  { code: 'M25.5', name: '관절통', dermatomes: ['L4', 'L5'] },
-  { code: 'M79.3', name: '근막염', dermatomes: ['C5', 'C6', 'C7'] }
+  { code: 'M51.1', name: '요추 추간판 탈출증', dermatomes: ['L4', 'L5', 'S1'], anatomy: ['L4', 'L5', '척립근'] },
+  { code: 'M54.5', name: '요통', dermatomes: ['L1', 'L2', 'L3'], anatomy: ['L1', 'L2', 'L3', '광배근', '요방형근'] },
+  { code: 'M25.5', name: '관절통', dermatomes: ['L4', 'L5'], anatomy: ['L4', 'L5'] },
+  { code: 'M79.3', name: '근막염', dermatomes: ['C5', 'C6', 'C7'], anatomy: ['C5', 'C6', 'C7', '승모근', '능형근'] },
+  { code: 'M50.1', name: '경추 추간판 탈출증', dermatomes: ['C6', 'C7'], anatomy: ['C6', 'C7'] },
+  { code: 'M53.1', name: '경부 증후군', dermatomes: ['C2', 'C3', 'C4'], anatomy: ['C2', 'C3', 'C4', '승모근'] },
+  { code: 'M75.3', name: '어깨 충돌 증후군', dermatomes: ['C5', 'C6'], anatomy: ['견갑골', '상완골', '삼각근'] },
+  { code: 'M17.1', name: '슬관절염', dermatomes: ['L3', 'L4'], anatomy: ['슬개골', '대퇴골', '경골'] }
 ];
 
 const anatomicalStructure = {
-  '허리': {
-    '척추': {
-      '요추': ['L1', 'L2', 'L3', 'L4', 'L5']
+  '척추': {
+    '경추': {
+      '상부 경추': ['C1', 'C2', 'C3'],
+      '하부 경추': ['C4', 'C5', 'C6', 'C7']
     },
-    '근육': ['척립근', '광배근', '요방형근']
+    '흉추': {
+      '상부 흉추': ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'],
+      '하부 흉추': ['T7', 'T8', 'T9', 'T10', 'T11', 'T12']
+    },
+    '요추': {
+      '상부 요추': ['L1', 'L2', 'L3'],
+      '하부 요추': ['L4', 'L5']
+    },
+    '천추/미추': {
+      '천추': ['S1', 'S2', 'S3', 'S4', 'S5'],
+      '미추': ['Co1', 'Co2', 'Co3', 'Co4']
+    }
   },
-  '목': {
-    '척추': {
-      '경추': ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7']
+  '근육': {
+    '목 근육': {
+      '심층근': ['승모근', '능형근', '견갑거근'],
+      '표층근': ['흉쇄유돌근', '사각근']
+    },
+    '등 근육': {
+      '심층근': ['척립근', '다열근', '회전근'],
+      '표층근': ['광배근', '승모근']
+    },
+    '허리 근육': {
+      '심층근': ['요방형근', '장요근', '다열근'],
+      '표층근': ['광배근', '대둔근']
+    }
+  },
+  '관절': {
+    '상지 관절': {
+      '어깨': ['견갑골', '상완골', '쇄골'],
+      '팔꿈치': ['상완골', '요골', '척골'],
+      '손목': ['요골', '척골', '수근골']
+    },
+    '하지 관절': {
+      '고관절': ['대퇴골', '골반', '비구'],
+      '무릎': ['대퇴골', '경골', '슬개골'],
+      '발목': ['경골', '비골', '거골']
     }
   }
 };
@@ -207,6 +244,9 @@ const App: React.FC = () => {
 
   const [candidateDiseases, setCandidateDiseases] = useState<typeof mockDiseases>([]);
   const [selectedDisease, setSelectedDisease] = useState<typeof mockDiseases[0] | null>(null);
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [diseaseChangeMessage, setDiseaseChangeMessage] = useState<string>('');
+  const [showPreview, setShowPreview] = useState<boolean>(false);
 
   // 바디맵 영역 클릭 핸들러
   const handleBodyMapClick = (area: string) => {
@@ -256,6 +296,68 @@ const App: React.FC = () => {
     setCandidateDiseases(candidates);
   };
 
+  // 치료 옵션 선택 핸들러
+  const handleTreatmentSelection = (treatment: string, checked: boolean) => {
+    setPatientData(prev => ({
+      ...prev,
+      treatment: {
+        ...prev.treatment,
+        selected: checked
+          ? [...prev.treatment.selected, treatment]
+          : prev.treatment.selected.filter(t => t !== treatment)
+      }
+    }));
+  };
+
+  // 해부학적 부위 선택 핸들러
+  const handleAnatomicalSelection = (anatomyPart: string) => {
+    const isSelected = patientData.anatomicalSelection.includes(anatomyPart);
+    const newSelection = isSelected
+      ? patientData.anatomicalSelection.filter(s => s !== anatomyPart)
+      : [...patientData.anatomicalSelection, anatomyPart];
+
+    setPatientData(prev => ({
+      ...prev,
+      anatomicalSelection: newSelection
+    }));
+
+    // 해부학적 부위 기반 상병 후보 필터링
+    filterDiseasesByAnatomy(newSelection);
+  };
+
+  // 해부학적 부위 기반 상병 필터링
+  const filterDiseasesByAnatomy = (selectedAnatomy: string[]) => {
+    if (selectedAnatomy.length === 0) {
+      // 해부학적 부위가 선택되지 않은 경우, 기존 더마톰 기반 필터링만 적용
+      updateCandidateDiseases(patientData.symptoms.selectedAreas);
+      return;
+    }
+
+    const previousCount = candidateDiseases.length;
+
+    // 더마톰 기반 후보 + 해부학적 부위 기반 추가 필터링
+    const dermatomeBasedCandidates = candidateDiseases.length > 0 ? candidateDiseases : mockDiseases;
+    const anatomyFilteredCandidates = dermatomeBasedCandidates.filter(disease =>
+      disease.anatomy.some(anatomy => selectedAnatomy.includes(anatomy))
+    );
+
+    setCandidateDiseases(anatomyFilteredCandidates);
+
+    // 후보가 줄어들었을 때 메시지 표시
+    if (anatomyFilteredCandidates.length < previousCount && previousCount > 0) {
+      setDiseaseChangeMessage(`상병 후보가 ${previousCount}개에서 ${anatomyFilteredCandidates.length}개로 변경되었습니다.`);
+      setTimeout(() => setDiseaseChangeMessage(''), 3000); // 3초 후 메시지 사라짐
+    }
+  };
+
+  // 섹션 토글 핸들러
+  const toggleSection = (sectionPath: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionPath]: !prev[sectionPath]
+    }));
+  };
+
   const calculateOnsetDate = () => {
     const today = new Date();
     const { daysAgo = 0, weeksAgo = 0, monthsAgo = 0 } = patientData.symptoms;
@@ -289,7 +391,11 @@ const App: React.FC = () => {
 
   const generatePatientReport = () => {
     const { selectedAreas, areaSymptoms } = patientData.symptoms;
-    const diagnosis = candidateDiseases[0]?.name || '추가 검사 필요';
+
+    // 선택된 상병이 있으면 우선 사용, 없으면 첫 번째 후보 사용
+    const finalDiagnosis = selectedDisease || candidateDiseases[0];
+    const diagnosis = finalDiagnosis?.name || '추가 검사 필요';
+    const diagnosisCode = finalDiagnosis?.code || '';
 
     let symptomsText = '';
     if (selectedAreas.length > 0) {
@@ -301,10 +407,57 @@ const App: React.FC = () => {
       symptomsText = '증상 입력 필요';
     }
 
+    let anatomicalText = '';
+    if (patientData.anatomicalSelection.length > 0) {
+      anatomicalText = `
+판독 결과 (해부학적 부위):
+${patientData.anatomicalSelection.join(', ')}`;
+    }
+
+    let examText = '';
+    if (patientData.physicalExam.isExpanded) {
+      examText = `
+신체검사: 실시됨`;
+    }
+
+    let imagingText = '';
+    if (patientData.xray.images.length > 0) {
+      imagingText = `
+영상검사: X-ray 촬영 (${patientData.xray.images.length}장)`;
+    }
+
+    let treatmentText = '';
+    if (patientData.treatment.selected.length > 0) {
+      const treatmentPrecautions = {
+        '스테로이드 주사': '항염 효과, 금주 필요',
+        '신경차단술': '통증 완화, 감염 주의',
+        'NSAIDs': '위장관 부작용 주의',
+        '근이완제': '졸음 유발 가능'
+      };
+
+      treatmentText = `
+
+처방된 치료:
+${patientData.treatment.selected.map(treatment => {
+        const precaution = treatmentPrecautions[treatment as keyof typeof treatmentPrecautions];
+        return `- ${treatment}${precaution ? ` (${precaution})` : ''}`;
+      }).join('\n')}`;
+    }
+
+    // 상병 후보 목록 추가 (선택된 것이 있을 때)
+    let candidatesText = '';
+    if (candidateDiseases.length > 1) {
+      candidatesText = `
+
+기타 고려된 상병:
+${candidateDiseases.filter(d => d.code !== diagnosisCode).map(d => `${d.code} - ${d.name}`).join('\n')}`;
+    }
+
     return `안녕하세요. 오늘 진료 결과를 알려드립니다.
 
-증상: ${symptomsText}
-진단: ${diagnosis}
+증상: ${symptomsText}${anatomicalText}${examText}${imagingText}${treatmentText}
+
+진단: ${diagnosisCode ? `${diagnosisCode} - ` : ''}${diagnosis}${candidatesText}
 
 주의사항:
 - 처방받은 약물 복용 시 주의사항을 지켜주세요
@@ -380,7 +533,7 @@ const App: React.FC = () => {
 
             <div className="symptom-input-section">
               <div className="date-input">
-                <h4>일자</h4>
+                <h4>증상 발현 일자</h4>
                 <div className="date-input-container">
                   <div className="date-spinners">
                     <div>
@@ -518,62 +671,115 @@ const App: React.FC = () => {
           {/* 판독, 해부학적 부위 선택 */}
           <div className="anatomical-selection-section">
             <h3>판독, 해부학적 부위 선택</h3>
+
+            {/* 상병 변경 알림 메시지 */}
+            {diseaseChangeMessage && (
+              <div className="disease-change-notification">
+                <span className="notification-icon">ℹ️</span>
+                <span className="notification-text">{diseaseChangeMessage}</span>
+              </div>
+            )}
+
             <div className="anatomical-tree">
               {Object.entries(anatomicalStructure).map(([mainArea, subAreas]) => (
                 <div key={mainArea} className="anatomical-group">
-                  <h4>{mainArea}</h4>
-                  {Object.entries(subAreas).map(([subArea, items]) => (
-                    <div key={subArea} className="anatomical-subgroup">
-                      <h5>{subArea}</h5>
-                      {Array.isArray(items) ? (
-                        items.map(item => (
-                          <label key={item}>
-                            <input
-                              type="checkbox"
-                              checked={patientData.anatomicalSelection.includes(item)}
-                              onChange={e => {
-                                const newSelection = e.target.checked
-                                  ? [...patientData.anatomicalSelection, item]
-                                  : patientData.anatomicalSelection.filter(s => s !== item);
-                                setPatientData(prev => ({
-                                  ...prev,
-                                  anatomicalSelection: newSelection
-                                }));
-                              }}
-                            />
-                            {item}
-                          </label>
-                        ))
-                      ) : (
-                        Object.entries(items).map(([subSubArea, subItems]) => (
-                          <div key={subSubArea}>
-                            <h6>{subSubArea}</h6>
-                            {(subItems as string[]).map(item => (
-                              <label key={item}>
-                                <input
-                                  type="checkbox"
-                                  checked={patientData.anatomicalSelection.includes(item)}
-                                  onChange={e => {
-                                    const newSelection = e.target.checked
-                                      ? [...patientData.anatomicalSelection, item]
-                                      : patientData.anatomicalSelection.filter(s => s !== item);
-                                    setPatientData(prev => ({
-                                      ...prev,
-                                      anatomicalSelection: newSelection
-                                    }));
-                                  }}
-                                />
-                                {item}
-                              </label>
-                            ))}
+                  <div
+                    className="anatomical-main-header"
+                    onClick={() => toggleSection(mainArea)}
+                  >
+                    <span className="toggle-icon">
+                      {expandedSections[mainArea] ? '▼' : '▶'}
+                    </span>
+                    <h4>{mainArea}</h4>
+                  </div>
+
+                  {expandedSections[mainArea] && (
+                    <div className="anatomical-main-content">
+                      {Object.entries(subAreas).map(([subArea, items]) => (
+                        <div key={subArea} className="anatomical-subgroup">
+                          <div
+                            className="anatomical-sub-header"
+                            onClick={() => toggleSection(`${mainArea}-${subArea}`)}
+                          >
+                            <span className="toggle-icon">
+                              {expandedSections[`${mainArea}-${subArea}`] ? '▼' : '▶'}
+                            </span>
+                            <h5>{subArea}</h5>
                           </div>
-                        ))
-                      )}
+
+                          {expandedSections[`${mainArea}-${subArea}`] && (
+                            <div className="anatomical-sub-content">
+                              {Array.isArray(items) ? (
+                                items.map(item => (
+                                  <label key={item} className="anatomical-item">
+                                    <input
+                                      type="checkbox"
+                                      checked={patientData.anatomicalSelection.includes(item)}
+                                      onChange={() => handleAnatomicalSelection(item)}
+                                    />
+                                    <span className="anatomical-label">{item}</span>
+                                  </label>
+                                ))
+                              ) : (
+                                Object.entries(items).map(([subSubArea, subItems]) => (
+                                  <div key={subSubArea} className="anatomical-subsub-group">
+                                    <div
+                                      className="anatomical-subsub-header"
+                                      onClick={() => toggleSection(`${mainArea}-${subArea}-${subSubArea}`)}
+                                    >
+                                      <span className="toggle-icon">
+                                        {expandedSections[`${mainArea}-${subArea}-${subSubArea}`] ? '▼' : '▶'}
+                                      </span>
+                                      <h6>{subSubArea}</h6>
+                                    </div>
+
+                                    {expandedSections[`${mainArea}-${subArea}-${subSubArea}`] && (
+                                      <div className="anatomical-subsub-content">
+                                        {(subItems as string[]).map(item => (
+                                          <label key={item} className="anatomical-item">
+                                            <input
+                                              type="checkbox"
+                                              checked={patientData.anatomicalSelection.includes(item)}
+                                              onChange={() => handleAnatomicalSelection(item)}
+                                            />
+                                            <span className="anatomical-label">{item}</span>
+                                          </label>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
               ))}
             </div>
+
+            {/* 선택된 해부학적 부위 표시 */}
+            {patientData.anatomicalSelection.length > 0 && (
+              <div className="selected-anatomy-summary">
+                <h4>선택된 해부학적 부위 ({patientData.anatomicalSelection.length}개)</h4>
+                <div className="selected-anatomy-tags">
+                  {patientData.anatomicalSelection.map(item => (
+                    <span key={item} className="anatomy-tag">
+                      {item}
+                      <button
+                        className="remove-anatomy-btn"
+                        onClick={() => handleAnatomicalSelection(item)}
+                        title="제거"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 치료 및 처방 주의사항 */}
@@ -600,11 +806,21 @@ const App: React.FC = () => {
                   {patientData.treatment.type === '주사' && (
                     <>
                       <div className="treatment-option">
-                        <input type="checkbox" id="steroid" />
+                        <input
+                          type="checkbox"
+                          id="steroid"
+                          checked={patientData.treatment.selected.includes('스테로이드 주사')}
+                          onChange={(e) => handleTreatmentSelection('스테로이드 주사', e.target.checked)}
+                        />
                         <label htmlFor="steroid">스테로이드 주사 - 항염 효과, 금주 필요</label>
                       </div>
                       <div className="treatment-option">
-                        <input type="checkbox" id="nerve-block" />
+                        <input
+                          type="checkbox"
+                          id="nerve-block"
+                          checked={patientData.treatment.selected.includes('신경차단술')}
+                          onChange={(e) => handleTreatmentSelection('신경차단술', e.target.checked)}
+                        />
                         <label htmlFor="nerve-block">신경차단술 - 통증 완화, 감염 주의</label>
                       </div>
                     </>
@@ -612,11 +828,21 @@ const App: React.FC = () => {
                   {patientData.treatment.type === '처방' && (
                     <>
                       <div className="treatment-option">
-                        <input type="checkbox" id="nsaid" />
+                        <input
+                          type="checkbox"
+                          id="nsaid"
+                          checked={patientData.treatment.selected.includes('NSAIDs')}
+                          onChange={(e) => handleTreatmentSelection('NSAIDs', e.target.checked)}
+                        />
                         <label htmlFor="nsaid">NSAIDs - 위장관 부작용 주의</label>
                       </div>
                       <div className="treatment-option">
-                        <input type="checkbox" id="muscle-relaxant" />
+                        <input
+                          type="checkbox"
+                          id="muscle-relaxant"
+                          checked={patientData.treatment.selected.includes('근이완제')}
+                          onChange={(e) => handleTreatmentSelection('근이완제', e.target.checked)}
+                        />
                         <label htmlFor="muscle-relaxant">근이완제 - 졸음 유발 가능</label>
                       </div>
                     </>
@@ -689,8 +915,40 @@ const App: React.FC = () => {
                   ))}
                 </div>
               )}
+
+              <h4>해부학적 부위</h4>
+              {patientData.anatomicalSelection.length === 0 ? (
+                <p>미선택</p>
+              ) : (
+                <div className="chart-anatomy">
+                  {patientData.anatomicalSelection.map(anatomy => (
+                    <div key={anatomy} className="chart-anatomy-item">
+                      <span className="anatomy-label">{anatomy}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <h4>상병</h4>
-              <p>{candidateDiseases[0]?.name || '미결정'}</p>
+              <p>{(selectedDisease || candidateDiseases[0])?.name || '미결정'}</p>
+              {(selectedDisease || candidateDiseases[0]) && (
+                <p className="disease-code">
+                  {(selectedDisease || candidateDiseases[0])?.code}
+                </p>
+              )}
+
+              <h4>치료 방법</h4>
+              {patientData.treatment.selected.length === 0 ? (
+                <p>미선택</p>
+              ) : (
+                <div className="chart-treatment">
+                  {patientData.treatment.selected.map(treatment => (
+                    <div key={treatment} className="chart-treatment-item">
+                      <span className="treatment-label">{treatment}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -706,6 +964,7 @@ const App: React.FC = () => {
                 }))}
               />
               <div className="report-actions">
+                <button onClick={() => setShowPreview(true)}>미리보기</button>
                 <button>PDF 내보내기</button>
                 <button>SMS 전송</button>
                 <button>이메일 전송</button>
@@ -714,6 +973,25 @@ const App: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 미리보기 모달 */}
+      {showPreview && (
+        <div className="preview-modal" onClick={() => setShowPreview(false)}>
+          <div className="preview-content" onClick={e => e.stopPropagation()}>
+            <div className="preview-header">
+              <h3>설명서 미리보기</h3>
+              <button className="close-btn" onClick={() => setShowPreview(false)}>×</button>
+            </div>
+            <div className="preview-body">
+              <pre>{generatePatientReport()}</pre>
+            </div>
+            <div className="preview-footer">
+              <button onClick={() => setShowPreview(false)}>닫기</button>
+              <button>PDF 내보내기</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
