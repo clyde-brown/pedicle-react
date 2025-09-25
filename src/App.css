@@ -1,11 +1,82 @@
 /* App.css - 진료 프로세스 맞춤 차팅 보조 UI 스타일 */
 
-.app {
-  font-family: 'Arial', sans-serif;
+/* 토스 디자인 시스템 변수 */
+:root {
+  --toss-blue: #3182f6;
+  --toss-blue-light: #4593fc;
+  --toss-blue-dark: #1b64da;
+  --toss-gray-50: #f9fafb;
+  --toss-gray-100: #f2f4f6;
+  --toss-gray-200: #e5e8eb;
+  --toss-gray-300: #d1d6db;
+  --toss-gray-400: #b0b8c1;
+  --toss-gray-500: #8b95a1;
+  --toss-gray-600: #6b7684;
+  --toss-gray-700: #4e5968;
+  --toss-gray-800: #333d4b;
+  --toss-gray-900: #191f28;
+  --toss-green: #07b53b;
+  --toss-red: #f04452;
+  --toss-orange: #ff6f00;
+  --toss-shadow-1: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --toss-shadow-2: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --toss-shadow-3: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --toss-radius: 12px;
+  --toss-radius-sm: 8px;
+  --toss-radius-lg: 16px;
+}
+
+/* 토스 스타일 기본 요소들 */
+input[type="text"], input[type="number"], textarea, select {
+  padding: 12px 16px;
+  border: 2px solid var(--toss-gray-200);
+  border-radius: var(--toss-radius-sm);
   font-size: 14px;
+  font-family: inherit;
+  line-height: 1.5;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--toss-blue);
+  box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.1);
+}
+
+input[type="text"]::placeholder, input[type="number"]::placeholder, textarea::placeholder {
+  color: var(--toss-gray-400);
+}
+
+/* 체크박스 커스텀 스타일 */
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--toss-blue);
+  cursor: pointer;
+}
+
+/* 토스 타이포그래피 */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--toss-gray-900);
+  font-weight: 700;
   line-height: 1.4;
-  color: #333;
-  background-color: #f5f5f5;
+  margin: 0;
+}
+
+h1 { font-size: 28px; }
+h2 { font-size: 24px; }
+h3 { font-size: 20px; }
+h4 { font-size: 16px; }
+h5 { font-size: 14px; }
+h6 { font-size: 12px; }
+
+.app {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Pretendard', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--toss-gray-800);
+  background-color: var(--toss-gray-50);
   min-height: 100vh;
 }
 
@@ -22,9 +93,10 @@
 /* 왼쪽 사이드바 */
 .sidebar {
   background: white;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  padding: 16px;
+  border-radius: var(--toss-radius);
+  border: 1px solid var(--toss-gray-200);
+  padding: 20px;
+  box-shadow: var(--toss-shadow-1);
 }
 
 .patient-info h3 {
@@ -113,7 +185,7 @@
 .main-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 /* 상단 섹션 - 바디맵과 증상 입력 */
@@ -125,9 +197,15 @@
 
 .body-map-section, .symptom-input-section {
   background: white;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  padding: 16px;
+  border-radius: var(--toss-radius);
+  border: 1px solid var(--toss-gray-200);
+  padding: 24px;
+  box-shadow: var(--toss-shadow-1);
+  transition: box-shadow 0.2s ease;
+}
+
+.body-map-section:hover, .symptom-input-section:hover {
+  box-shadow: var(--toss-shadow-2);
 }
 
 .body-map h3, .symptom-input-section h4 {
@@ -263,19 +341,28 @@
 }
 
 .date-confirm-btn {
-  padding: 6px 12px;
-  background: #3498db;
+  padding: 10px 20px;
+  background: var(--toss-blue);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--toss-radius-sm);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 600;
   flex-shrink: 0;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
+  box-shadow: var(--toss-shadow-1);
 }
 
 .date-confirm-btn:hover {
-  background: #2980b9;
+  background: var(--toss-blue-dark);
+  box-shadow: var(--toss-shadow-2);
+  transform: translateY(-1px);
+}
+
+.date-confirm-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--toss-shadow-1);
 }
 
 .onset-display {
@@ -305,30 +392,55 @@
 .symptoms textarea {
   width: 100%;
   min-height: 80px;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 13px;
+  padding: 16px;
+  border: 2px solid var(--toss-gray-200);
+  border-radius: var(--toss-radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.5;
   resize: vertical;
   margin-top: 8px;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.symptoms textarea:focus {
+  outline: none;
+  border-color: var(--toss-blue);
+  box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.1);
+}
+
+.symptoms textarea::placeholder {
+  color: var(--toss-gray-400);
 }
 
 /* 신체검사 섹션 */
 .physical-exam-section {
   background: white;
-  border-radius: 8px;
-  border: 1px solid #ddd;
+  border-radius: var(--toss-radius);
+  border: 1px solid var(--toss-gray-200);
   overflow: hidden;
+  box-shadow: var(--toss-shadow-1);
+  transition: box-shadow 0.2s ease;
+}
+
+.physical-exam-section:hover {
+  box-shadow: var(--toss-shadow-2);
 }
 
 .section-header {
-  padding: 16px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #ddd;
+  padding: 20px 24px;
+  background: var(--toss-gray-50);
+  border-bottom: 1px solid var(--toss-gray-200);
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.section-header:hover {
+  background: var(--toss-gray-100);
 }
 
 .section-header h3 {
@@ -357,9 +469,15 @@
 /* X-Ray 섹션 */
 .xray-section {
   background: white;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  padding: 16px;
+  border-radius: var(--toss-radius);
+  border: 1px solid var(--toss-gray-200);
+  padding: 24px;
+  box-shadow: var(--toss-shadow-1);
+  transition: box-shadow 0.2s ease;
+}
+
+.xray-section:hover {
+  box-shadow: var(--toss-shadow-2);
 }
 
 .xray-section h3 {
@@ -406,9 +524,15 @@
 /* 해부학적 선택 섹션 */
 .anatomical-selection-section {
   background: white;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  padding: 16px;
+  border-radius: var(--toss-radius);
+  border: 1px solid var(--toss-gray-200);
+  padding: 24px;
+  box-shadow: var(--toss-shadow-1);
+  transition: box-shadow 0.2s ease;
+}
+
+.anatomical-selection-section:hover {
+  box-shadow: var(--toss-shadow-2);
 }
 
 .anatomical-selection-section h3 {
@@ -464,9 +588,15 @@
 /* 치료 섹션 */
 .treatment-section {
   background: white;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  padding: 16px;
+  border-radius: var(--toss-radius);
+  border: 1px solid var(--toss-gray-200);
+  padding: 24px;
+  box-shadow: var(--toss-shadow-1);
+  transition: box-shadow 0.2s ease;
+}
+
+.treatment-section:hover {
+  box-shadow: var(--toss-shadow-2);
 }
 
 .treatment-section h3 {
@@ -483,24 +613,34 @@
 }
 
 .treatment-type {
-  padding: 8px 16px;
-  border: 1px solid #ddd;
+  padding: 12px 20px;
+  border: 2px solid var(--toss-gray-200);
   background: white;
-  border-radius: 4px;
+  border-radius: var(--toss-radius-sm);
   cursor: pointer;
-  font-size: 13px;
-  transition: all 0.2s;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: var(--toss-shadow-1);
 }
 
 .treatment-type:hover {
-  border-color: #3498db;
-  background: #f8f9fa;
+  border-color: var(--toss-blue);
+  background: var(--toss-gray-50);
+  box-shadow: var(--toss-shadow-2);
+  transform: translateY(-1px);
 }
 
 .treatment-type.selected {
-  border-color: #3498db;
-  background: #3498db;
+  border-color: var(--toss-blue);
+  background: var(--toss-blue);
   color: white;
+  box-shadow: var(--toss-shadow-2);
+}
+
+.treatment-type.selected:hover {
+  background: var(--toss-blue-dark);
+  border-color: var(--toss-blue-dark);
 }
 
 .treatment-options h4 {
@@ -527,14 +667,20 @@
 .right-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .disease-candidates, .real-time-chart, .patient-report {
   background: white;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  padding: 16px;
+  border-radius: var(--toss-radius);
+  border: 1px solid var(--toss-gray-200);
+  padding: 24px;
+  box-shadow: var(--toss-shadow-1);
+  transition: box-shadow 0.2s ease;
+}
+
+.disease-candidates:hover, .real-time-chart:hover, .patient-report:hover {
+  box-shadow: var(--toss-shadow-2);
 }
 
 /* 상병 후보 */
@@ -553,13 +699,34 @@
 }
 
 .select-button {
-  padding: 6px 12px;
-  background: #27ae60;
+  padding: 10px 20px;
+  background: var(--toss-green);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--toss-radius-sm);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: var(--toss-shadow-1);
+}
+
+.select-button:hover:not(:disabled) {
+  background: #06a034;
+  box-shadow: var(--toss-shadow-2);
+  transform: translateY(-1px);
+}
+
+.select-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--toss-shadow-1);
+}
+
+.select-button:disabled {
+  background: var(--toss-gray-300);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .candidates-list {
@@ -568,25 +735,28 @@
 }
 
 .candidate-item {
-  border: 1px solid #eee;
-  border-radius: 4px;
-  padding: 10px;
-  margin-bottom: 8px;
+  border: 2px solid var(--toss-gray-200);
+  border-radius: var(--toss-radius-sm);
+  padding: 16px;
+  margin-bottom: 12px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s ease;
   background: white;
+  box-shadow: var(--toss-shadow-1);
 }
 
 .candidate-item:hover {
-  border-color: #3498db;
-  background: #f8f9fa;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-color: var(--toss-blue);
+  background: var(--toss-gray-50);
+  box-shadow: var(--toss-shadow-2);
+  transform: translateY(-1px);
 }
 
 .candidate-item.selected {
-  border-color: #e74c3c;
-  background: #fff5f5;
-  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.2);
+  border-color: var(--toss-blue);
+  background: rgba(49, 130, 246, 0.05);
+  box-shadow: var(--toss-shadow-2);
+  transform: translateY(-1px);
 }
 
 .candidate-main {
@@ -729,18 +899,28 @@
 }
 
 .report-actions button {
-  padding: 8px 16px;
-  border: 1px solid #ddd;
+  padding: 12px 20px;
+  border: 1px solid var(--toss-gray-300);
   background: white;
-  border-radius: 4px;
+  border-radius: var(--toss-radius-sm);
   cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: var(--toss-shadow-1);
 }
 
 .report-actions button:hover {
-  border-color: #3498db;
-  background: #f8f9fa;
+  background: var(--toss-gray-50);
+  border-color: var(--toss-blue);
+  color: var(--toss-blue);
+  box-shadow: var(--toss-shadow-2);
+  transform: translateY(-1px);
+}
+
+.report-actions button:active {
+  transform: translateY(0);
+  box-shadow: var(--toss-shadow-1);
 }
 
 /* 신체검사 폼 스타일 */
