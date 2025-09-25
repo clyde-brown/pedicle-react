@@ -1,38 +1,626 @@
-.App {
-  text-align: center;
-}
+/* App.css - 진료 프로세스 맞춤 차팅 보조 UI 스타일 */
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+.app {
+  font-family: 'Arial', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #333;
+  background-color: #f5f5f5;
   min-height: 100vh;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 250px 1fr 300px;
+  gap: 16px;
+  padding: 16px;
+  max-width: 1600px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* 왼쪽 사이드바 */
+.sidebar {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 16px;
+}
+
+.patient-info h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.info-content {
+  color: #666;
+  font-size: 13px;
+}
+
+/* 메인 컨텐츠 */
+.main-content {
   display: flex;
   flex-direction: column;
+  gap: 16px;
+}
+
+/* 상단 섹션 - 바디맵과 증상 입력 */
+.top-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.body-map-section, .symptom-input-section {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 16px;
+}
+
+.body-map h3, .symptom-input-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+/* 바디맵 */
+.body-diagram {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.body-part {
+  padding: 12px 8px;
+  border: 2px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.body-part:hover {
+  border-color: #3498db;
+  background: #f8f9fa;
+}
+
+.body-part.selected {
+  border-color: #e74c3c;
+  background: #fee;
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+/* 증상 입력 섹션 */
+.date-spinners {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.date-spinners > div {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  gap: 4px;
+}
+
+.date-spinners input {
+  width: 50px;
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.date-spinners span {
+  font-size: 12px;
+  color: #666;
+}
+
+.date-spinners + button {
+  padding: 6px 12px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.onset-display {
+  margin: 8px 0;
+  padding: 8px;
+  background: #e8f5e8;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #2d5a2d;
+}
+
+.selected-parts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+.selected-part {
+  background: #e74c3c;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+}
+
+.symptoms textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  resize: vertical;
+  margin-top: 8px;
+}
+
+/* 신체검사 섹션 */
+.physical-exam-section {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  overflow: hidden;
+}
+
+.section-header {
+  padding: 16px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.toggle {
+  font-size: 12px;
+  color: #666;
+}
+
+.exam-content {
+  padding: 16px;
+}
+
+.exam-summary {
+  padding: 12px 16px;
+  background: #e8f5e8;
+  color: #2d5a2d;
+  font-size: 13px;
+}
+
+/* X-Ray 섹션 */
+.xray-section {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 16px;
+}
+
+.xray-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.xray-upload input[type="file"] {
+  margin-bottom: 12px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.xray-thumbnails {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.xray-thumbnail {
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.xray-thumbnail img {
+  width: 100%;
+  max-width: 100px;
+  height: auto;
+  border-radius: 4px;
+}
+
+.xray-thumbnail p {
+  margin: 4px 0 0 0;
+  font-size: 11px;
+  color: #666;
+}
+
+/* 해부학적 선택 섹션 */
+.anatomical-selection-section {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 16px;
+}
+
+.anatomical-selection-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.anatomical-tree {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.anatomical-group h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: bold;
+  color: #34495e;
+}
+
+.anatomical-subgroup {
+  margin-left: 16px;
+  margin-bottom: 12px;
+}
+
+.anatomical-subgroup h5 {
+  margin: 0 0 6px 0;
+  font-size: 12px;
+  font-weight: bold;
+  color: #666;
+}
+
+.anatomical-subgroup h6 {
+  margin: 6px 0 4px 0;
+  font-size: 11px;
+  font-weight: normal;
+  color: #888;
+}
+
+.anatomical-subgroup label {
+  display: block;
+  margin: 2px 0;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.anatomical-subgroup input[type="checkbox"] {
+  margin-right: 6px;
+}
+
+/* 치료 섹션 */
+.treatment-section {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 16px;
+}
+
+.treatment-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.treatment-types {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.treatment-type {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.treatment-type:hover {
+  border-color: #3498db;
+  background: #f8f9fa;
+}
+
+.treatment-type.selected {
+  border-color: #3498db;
+  background: #3498db;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.treatment-options h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: bold;
+  color: #34495e;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.treatment-option {
+  margin: 8px 0;
+}
+
+.treatment-option input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.treatment-option label {
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* 오른쪽 사이드바 */
+.right-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.disease-candidates, .real-time-chart, .patient-report {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 16px;
+}
+
+/* 상병 후보 */
+.candidates-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.candidates-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.select-button {
+  padding: 6px 12px;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.candidates-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.candidate-item {
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.candidate-item:hover {
+  border-color: #3498db;
+  background: #f8f9fa;
+}
+
+.candidate-item h4 {
+  margin: 0 0 4px 0;
+  font-size: 13px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.candidate-item p {
+  margin: 0 0 4px 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.candidate-item small {
+  font-size: 10px;
+  color: #888;
+}
+
+/* 실시간 차팅 */
+.real-time-chart h3, .patient-report h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.chart-content h4 {
+  margin: 12px 0 4px 0;
+  font-size: 12px;
+  font-weight: bold;
+  color: #34495e;
+}
+
+.chart-content p {
+  margin: 0 0 8px 0;
+  font-size: 11px;
+  color: #666;
+  background: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+
+/* 설명서 발송 */
+.report-content textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 11px;
+  resize: vertical;
+  margin-bottom: 12px;
+}
+
+.report-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.report-actions button {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.report-actions button:hover {
+  border-color: #3498db;
+  background: #f8f9fa;
+}
+
+/* 신체검사 폼 스타일 */
+.physical-exam-form {
+  padding: 16px;
+}
+
+.physical-exam-form h4 {
+  margin: 16px 0 8px 0;
+  font-size: 14px;
+  font-weight: bold;
+  color: #34495e;
+}
+
+.exam-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.exam-grid label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.slr-tests {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.slr-tests label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.motor-tests {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.motor-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.motor-item span {
+  font-weight: bold;
+  color: #34495e;
+  min-width: 30px;
+}
+
+.motor-item select {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.physical-exam-form textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  resize: vertical;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
-  to {
-    transform: rotate(360deg);
+
+  .top-section {
+    grid-template-columns: 1fr;
+  }
+
+  .right-sidebar {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 8px;
+  }
+
+  .body-diagram {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .date-spinners {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .treatment-types {
+    flex-direction: column;
   }
 }
