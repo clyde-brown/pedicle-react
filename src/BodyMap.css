@@ -1,0 +1,216 @@
+/* BodyMap.css - 인체 바디맵 전용 스타일 */
+
+.body-map-container {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 500px;
+}
+
+.body-map-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.view-toggle {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.view-toggle:hover {
+  border-color: #3498db;
+  background: #f8f9fa;
+}
+
+.view-toggle.active {
+  border-color: #3498db;
+  background: #3498db;
+  color: white;
+}
+
+.body-diagram {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.body-svg {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fafafa;
+  padding: 10px;
+}
+
+/* SVG 신체 부위 스타일 */
+.body-part {
+  fill: #e8f4f8;
+  stroke: #3498db;
+  stroke-width: 1.5;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 0.7;
+}
+
+.body-part:hover {
+  fill: #d4edda;
+  stroke: #28a745;
+  stroke-width: 2;
+  opacity: 0.9;
+  transform: scale(1.05);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.body-part.selected {
+  fill: #ffebee;
+  stroke: #e74c3c;
+  stroke-width: 2.5;
+  opacity: 1;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* 툴팁 효과 */
+.body-part[data-area]:hover::after {
+  content: attr(data-area);
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  pointer-events: none;
+  z-index: 1000;
+  white-space: nowrap;
+}
+
+.selected-areas {
+  margin-top: 16px;
+  width: 100%;
+}
+
+.selected-areas h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.selected-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.selected-area-tag {
+  background: #e74c3c;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.selected-area-tag button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.selected-area-tag button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .body-map-container {
+    padding: 12px;
+  }
+
+  .body-svg {
+    max-width: 180px;
+  }
+
+  .view-toggle {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
+/* 접근성 개선 */
+.body-part:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+}
+
+/* 더마톰 관련 시각적 피드백 */
+.body-part.dermatome-highlight {
+  fill: #fff3cd;
+  stroke: #ffc107;
+  stroke-width: 2;
+  stroke-dasharray: 5,5;
+  animation: dermatome-glow 2s infinite;
+}
+
+@keyframes dermatome-glow {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* 로딩 애니메이션 */
+.body-svg.loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.body-svg.loading::after {
+  content: "로딩 중...";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #666;
+}

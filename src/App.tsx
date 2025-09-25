@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import './App.css';
+import BodyMap from './BodyMap';
 
 // 데이터 타입 정의
 interface PatientData {
   symptoms: {
     selectedAreas: string[];
-    symptomDescription: string;
+    areaSymptoms: Record<string, string>; // 부위별 증상 저장
     daysAgo?: number;
     weeksAgo?: number;
     monthsAgo?: number;
@@ -29,18 +30,51 @@ interface PatientData {
   patientReport: string;
 }
 
-// Mock 데이터
+// Mock 데이터 - 더마톰 매핑 (간단한 신체 부위)
 const mockDermatomeMapping: Record<string, string[]> = {
-  '목': ['C5', 'C6', 'C7', 'C8'],
+  // 전면
+  '머리': ['C1', 'C2'],
+  '목': ['C2', 'C3', 'C4'],
   '어깨': ['C5', 'C6'],
-  '팔': ['C6', 'C7', 'C8'],
-  '가슴': ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'],
+  '가슴': ['T2', 'T3', 'T4', 'T5', 'T6'],
   '복부': ['T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
   '허리': ['L1', 'L2', 'L3'],
+  '좌팔': ['C6', 'C7', 'C8'],
+  '우팔': ['C6', 'C7', 'C8'],
+  '좌팔뚝': ['C7', 'C8'],
+  '우팔뚝': ['C7', 'C8'],
+  '좌손': ['C8'],
+  '우손': ['C8'],
   '엉덩이': ['L4', 'L5', 'S1'],
-  '허벅지': ['L2', 'L3', 'L4'],
-  '종아리': ['L4', 'L5', 'S1'],
-  '발': ['L5', 'S1', 'S2']
+  '좌허벅지': ['L2', 'L3', 'L4'],
+  '우허벅지': ['L2', 'L3', 'L4'],
+  '좌무릎': ['L3', 'L4'],
+  '우무릎': ['L3', 'L4'],
+  '좌종아리': ['L4', 'L5', 'S1'],
+  '우종아리': ['L4', 'L5', 'S1'],
+  '좌발': ['L5', 'S1', 'S2'],
+  '우발': ['L5', 'S1', 'S2'],
+
+  // 후면
+  '뒤통수': ['C1', 'C2'],
+  '목뒤': ['C2', 'C3', 'C4'],
+  '어깨뒤': ['C5', 'C6'],
+  '등상부': ['T2', 'T3', 'T4', 'T5'],
+  '등중부': ['T6', 'T7', 'T8', 'T9'],
+  '등하부': ['T10', 'T11', 'T12', 'L1'],
+  '좌팔뒤': ['C6', 'C7', 'C8'],
+  '우팔뒤': ['C6', 'C7', 'C8'],
+  '좌팔뚝뒤': ['C7', 'C8'],
+  '우팔뚝뒤': ['C7', 'C8'],
+  '엉덩이뒤': ['L4', 'L5', 'S1', 'S2'],
+  '좌허벅지뒤': ['S1', 'S2'],
+  '우허벅지뒤': ['S1', 'S2'],
+  '좌무릎뒤': ['S1', 'S2'],
+  '우무릎뒤': ['S1', 'S2'],
+  '좌종아리뒤': ['S1', 'S2'],
+  '우종아리뒤': ['S1', 'S2'],
+  '좌발뒤': ['S1', 'S2'],
+  '우발뒤': ['S1', 'S2']
 };
 
 const mockDiseases = [
@@ -147,7 +181,7 @@ const App: React.FC = () => {
   const [patientData, setPatientData] = useState<PatientData>({
     symptoms: {
       selectedAreas: [],
-      symptomDescription: '',
+      areaSymptoms: {},
       daysAgo: undefined,
       weeksAgo: undefined,
       monthsAgo: undefined,
@@ -172,20 +206,46 @@ const App: React.FC = () => {
   });
 
   const [candidateDiseases, setCandidateDiseases] = useState<typeof mockDiseases>([]);
+  const [selectedDisease, setSelectedDisease] = useState<typeof mockDiseases[0] | null>(null);
 
   // 바디맵 영역 클릭 핸들러
   const handleBodyMapClick = (area: string) => {
-    const newAreas = patientData.symptoms.selectedAreas.includes(area)
+    const isRemoving = patientData.symptoms.selectedAreas.includes(area);
+    const newAreas = isRemoving
       ? patientData.symptoms.selectedAreas.filter(a => a !== area)
       : [...patientData.symptoms.selectedAreas, area];
 
+    // 부위 제거 시 해당 증상도 제거
+    const newAreaSymptoms = { ...patientData.symptoms.areaSymptoms };
+    if (isRemoving) {
+      delete newAreaSymptoms[area];
+    }
+
     setPatientData(prev => ({
       ...prev,
-      symptoms: { ...prev.symptoms, selectedAreas: newAreas }
+      symptoms: {
+        ...prev.symptoms,
+        selectedAreas: newAreas,
+        areaSymptoms: newAreaSymptoms
+      }
     }));
 
     // 더마톰 기반 1차 상병 후보 업데이트
     updateCandidateDiseases(newAreas);
+  };
+
+  // 부위별 증상 업데이트 핸들러
+  const handleAreaSymptomChange = (area: string, symptom: string) => {
+    setPatientData(prev => ({
+      ...prev,
+      symptoms: {
+        ...prev.symptoms,
+        areaSymptoms: {
+          ...prev.symptoms.areaSymptoms,
+          [area]: symptom
+        }
+      }
+    }));
   };
 
   const updateCandidateDiseases = (selectedAreas: string[]) => {
@@ -205,10 +265,15 @@ const App: React.FC = () => {
   };
 
   const updateChart = () => {
-    const { selectedAreas, symptomDescription, onset } = patientData.symptoms;
-    const chartText = `주소: ${selectedAreas.join(', ')} 부위 ${symptomDescription}
+    const { selectedAreas, areaSymptoms, onset } = patientData.symptoms;
+    const symptomsText = selectedAreas.map(area => {
+      const symptom = areaSymptoms[area];
+      return symptom ? `${area}: ${symptom}` : area;
+    }).join(', ');
+
+    const chartText = `주소: ${symptomsText}
 발생일: ${onset || calculateOnsetDate()}
-증상: ${symptomDescription}
+증상: ${symptomsText}
 신체검진: ${patientData.physicalExam.isExpanded ? '검사 완료' : '미실시'}
 영상검사: ${patientData.xray.images.length > 0 ? 'X-ray 촬영함' : '미실시'}
 상병: ${candidateDiseases.length > 0 ? candidateDiseases[0].name : '미결정'}`;
@@ -223,13 +288,22 @@ const App: React.FC = () => {
   }, [patientData.symptoms, patientData.physicalExam, patientData.xray, candidateDiseases]);
 
   const generatePatientReport = () => {
-    const areas = patientData.symptoms.selectedAreas.join(', ') || '미선택';
-    const symptoms = patientData.symptoms.symptomDescription || '미입력';
+    const { selectedAreas, areaSymptoms } = patientData.symptoms;
     const diagnosis = candidateDiseases[0]?.name || '추가 검사 필요';
+
+    let symptomsText = '';
+    if (selectedAreas.length > 0) {
+      symptomsText = selectedAreas.map(area => {
+        const symptom = areaSymptoms[area];
+        return symptom ? `${area} 부위의 ${symptom}` : `${area} 부위`;
+      }).join(', ');
+    } else {
+      symptomsText = '증상 입력 필요';
+    }
 
     return `안녕하세요. 오늘 진료 결과를 알려드립니다.
 
-증상: ${areas} 부위의 ${symptoms}
+증상: ${symptomsText}
 진단: ${diagnosis}
 
 주의사항:
@@ -248,7 +322,46 @@ const App: React.FC = () => {
           <div className="patient-info">
             <h3>환자 기본 정보</h3>
             <div className="info-content">
-              <p>내원이력 등</p>
+              <div className="patient-details">
+                <div className="info-item">
+                  <span className="info-label">이름:</span>
+                  <span className="info-value">김길동</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label">생년월일:</span>
+                  <span className="info-value">95년 12월 4일</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label">성별:</span>
+                  <span className="info-value">남성</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label">연락처:</span>
+                  <span className="info-value">010-1234-5678</span>
+                </div>
+              </div>
+
+              <div className="visit-history">
+                <h4>내원이력 (5건)</h4>
+                <div className="visit-list">
+                  <div className="visit-item">2024.09.15 - 요통</div>
+                  <div className="visit-item">2024.08.22 - 목 통증</div>
+                  <div className="visit-item">2024.07.10 - 어깨 결림</div>
+                  <div className="visit-item">2024.06.05 - 무릎 통증</div>
+                  <div className="visit-item">2024.05.18 - 허리 디스크</div>
+                </div>
+              </div>
+
+              <div className="patient-characteristics">
+                <h4>특이사항</h4>
+                <div className="characteristics-list">
+                  <div className="char-item">• 고혈압 (약물치료 중)</div>
+                  <div className="char-item">• 당뇨병 없음</div>
+                  <div className="char-item">• 흡연: 금연 (2년전)</div>
+                  <div className="char-item">• 음주: 주 1-2회</div>
+                  <div className="char-item">• 알레르기: 페니실린</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -258,93 +371,98 @@ const App: React.FC = () => {
           {/* 상단 영역 - 바디맵과 증상 입력 */}
           <div className="top-section">
             <div className="body-map-section">
-              <div className="body-map">
-                <h3>바디맵</h3>
-                <div className="body-diagram">
-                  {Object.keys(mockDermatomeMapping).map(area => (
-                    <button
-                      key={area}
-                      className={`body-part ${patientData.symptoms.selectedAreas.includes(area) ? 'selected' : ''}`}
-                      onClick={() => handleBodyMapClick(area)}
-                    >
-                      {area}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <h3>바디맵</h3>
+              <BodyMap
+                selectedAreas={patientData.symptoms.selectedAreas}
+                onAreaClick={handleBodyMapClick}
+              />
             </div>
 
             <div className="symptom-input-section">
               <div className="date-input">
                 <h4>일자</h4>
-                <div className="date-spinners">
-                  <div>
-                    <input
-                      type="number"
-                      placeholder="0"
-                      value={patientData.symptoms.daysAgo || ''}
-                      onChange={e => setPatientData(prev => ({
-                        ...prev,
-                        symptoms: { ...prev.symptoms, daysAgo: Number(e.target.value) || 0 }
-                      }))}
-                    />
-                    <span>일전</span>
+                <div className="date-input-container">
+                  <div className="date-spinners">
+                    <div>
+                      <input
+                        type="number"
+                        placeholder="0"
+                        value={patientData.symptoms.daysAgo || ''}
+                        onChange={e => setPatientData(prev => ({
+                          ...prev,
+                          symptoms: { ...prev.symptoms, daysAgo: Number(e.target.value) || 0 }
+                        }))}
+                      />
+                      <span>일전</span>
+                    </div>
+                    <div>
+                      <input
+                        type="number"
+                        placeholder="0"
+                        value={patientData.symptoms.weeksAgo || ''}
+                        onChange={e => setPatientData(prev => ({
+                          ...prev,
+                          symptoms: { ...prev.symptoms, weeksAgo: Number(e.target.value) || 0 }
+                        }))}
+                      />
+                      <span>주전</span>
+                    </div>
+                    <div>
+                      <input
+                        type="number"
+                        placeholder="0"
+                        value={patientData.symptoms.monthsAgo || ''}
+                        onChange={e => setPatientData(prev => ({
+                          ...prev,
+                          symptoms: { ...prev.symptoms, monthsAgo: Number(e.target.value) || 0 }
+                        }))}
+                      />
+                      <span>달전</span>
+                    </div>
                   </div>
-                  <div>
-                    <input
-                      type="number"
-                      placeholder="0"
-                      value={patientData.symptoms.weeksAgo || ''}
-                      onChange={e => setPatientData(prev => ({
-                        ...prev,
-                        symptoms: { ...prev.symptoms, weeksAgo: Number(e.target.value) || 0 }
-                      }))}
-                    />
-                    <span>주전</span>
-                  </div>
-                  <div>
-                    <input
-                      type="number"
-                      placeholder="0"
-                      value={patientData.symptoms.monthsAgo || ''}
-                      onChange={e => setPatientData(prev => ({
-                        ...prev,
-                        symptoms: { ...prev.symptoms, monthsAgo: Number(e.target.value) || 0 }
-                      }))}
-                    />
-                    <span>달전</span>
-                  </div>
+                  <button
+                    className="date-confirm-btn"
+                    onClick={() => setPatientData(prev => ({
+                      ...prev,
+                      symptoms: { ...prev.symptoms, onset: calculateOnsetDate() }
+                    }))}
+                  >
+                    확인
+                  </button>
                 </div>
-                <button onClick={() => setPatientData(prev => ({
-                  ...prev,
-                  symptoms: { ...prev.symptoms, onset: calculateOnsetDate() }
-                }))}>
-                  확인
-                </button>
                 {patientData.symptoms.onset && (
                   <p className="onset-display">{patientData.symptoms.onset}</p>
                 )}
               </div>
 
-              <div className="body-parts">
-                <h4>부위</h4>
-                <div className="selected-parts">
-                  {patientData.symptoms.selectedAreas.map(area => (
-                    <span key={area} className="selected-part">{area}</span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="symptoms">
-                <h4>증상</h4>
-                <textarea
-                  placeholder="증상을 입력하세요"
-                  value={patientData.symptoms.symptomDescription}
-                  onChange={e => setPatientData(prev => ({
-                    ...prev,
-                    symptoms: { ...prev.symptoms, symptomDescription: e.target.value }
-                  }))}
-                />
+              <div className="body-parts-symptoms">
+                <h4>부위 및 증상</h4>
+                {patientData.symptoms.selectedAreas.length === 0 ? (
+                  <p className="no-selection">바디맵에서 부위를 선택해주세요</p>
+                ) : (
+                  <div className="area-symptoms-list">
+                    {patientData.symptoms.selectedAreas.map(area => (
+                      <div key={area} className="area-symptom-item">
+                        <div className="area-header">
+                          <span className="area-name">{area}</span>
+                          <button
+                            className="remove-area-btn"
+                            onClick={() => handleBodyMapClick(area)}
+                            title="부위 제거"
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <textarea
+                          className="area-symptom-input"
+                          placeholder={`${area} 부위의 증상을 입력하세요 (예: 찌르는 통증, 저림, 둔통 등)`}
+                          value={patientData.symptoms.areaSymptoms[area] || ''}
+                          onChange={e => handleAreaSymptomChange(area, e.target.value)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -514,26 +632,63 @@ const App: React.FC = () => {
           <div className="disease-candidates">
             <div className="candidates-header">
               <h3>상병 후보</h3>
-              <button className="select-button">선택</button>
+              <button
+                className="select-button"
+                disabled={!selectedDisease}
+                onClick={() => {
+                  if (selectedDisease) {
+                    alert(`선택된 상병: ${selectedDisease.code} - ${selectedDisease.name}`);
+                  }
+                }}
+              >
+                선택
+              </button>
             </div>
             <div className="candidates-list">
               {candidateDiseases.map(disease => (
-                <div key={disease.code} className="candidate-item">
-                  <h4>{disease.name}</h4>
-                  <p>{disease.code}</p>
-                  <small>관련 더마톰: {disease.dermatomes.join(', ')}</small>
+                <div
+                  key={disease.code}
+                  className={`candidate-item ${selectedDisease?.code === disease.code ? 'selected' : ''}`}
+                  onClick={() => setSelectedDisease(disease)}
+                >
+                  <div className="candidate-main">
+                    <span className="disease-code">{disease.code}</span>
+                    <span className="disease-name">{disease.name}</span>
+                  </div>
+                  <div className="candidate-dermatomes">
+                    관련 더마톰: {disease.dermatomes.join(', ')}
+                  </div>
                 </div>
               ))}
             </div>
+            {selectedDisease && (
+              <div className="selected-disease-info">
+                <h4>선택된 상병</h4>
+                <div className="selected-info">
+                  <strong>{selectedDisease.code}</strong> - {selectedDisease.name}
+                  <br />
+                  <small>더마톰: {selectedDisease.dermatomes.join(', ')}</small>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="real-time-chart">
             <h3>실시간 환자 차팅</h3>
             <div className="chart-content">
-              <h4>부위</h4>
-              <p>{patientData.symptoms.selectedAreas.join(', ') || '미선택'}</p>
-              <h4>증상</h4>
-              <p>{patientData.symptoms.symptomDescription || '미입력'}</p>
+              <h4>부위별 증상</h4>
+              {patientData.symptoms.selectedAreas.length === 0 ? (
+                <p>미선택</p>
+              ) : (
+                <div className="chart-symptoms">
+                  {patientData.symptoms.selectedAreas.map(area => (
+                    <div key={area} className="chart-symptom-item">
+                      <strong>{area}:</strong>{' '}
+                      {patientData.symptoms.areaSymptoms[area] || '증상 미입력'}
+                    </div>
+                  ))}
+                </div>
+              )}
               <h4>상병</h4>
               <p>{candidateDiseases[0]?.name || '미결정'}</p>
             </div>
