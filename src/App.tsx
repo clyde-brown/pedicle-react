@@ -247,6 +247,20 @@ const App: React.FC = () => {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [diseaseChangeMessage, setDiseaseChangeMessage] = useState<string>('');
   const [showPreview, setShowPreview] = useState<boolean>(false);
+  const [selectedXrayImage, setSelectedXrayImage] = useState<File | null>(null);
+  const [showXrayModal, setShowXrayModal] = useState<boolean>(false);
+
+  // X-ray 썸네일 클릭 핸들러
+  const handleXrayThumbnailClick = (file: File) => {
+    setSelectedXrayImage(file);
+    setShowXrayModal(true);
+  };
+
+  // X-ray 모달 닫기 핸들러
+  const closeXrayModal = () => {
+    setShowXrayModal(false);
+    setSelectedXrayImage(null);
+  };
 
   // 바디맵 영역 클릭 핸들러
   const handleBodyMapClick = (area: string) => {
@@ -389,6 +403,38 @@ const App: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientData.symptoms, patientData.physicalExam, patientData.xray, candidateDiseases]);
 
+  // PDF 내보내기 핸들러 (X-ray 이미지 포함)
+  const handlePDFExport = () => {
+    const reportContent = generatePatientReport();
+    
+    // PDF 생성 로직 (실제 구현에서는 jsPDF나 다른 PDF 라이브러리 사용)
+    const blob = new Blob([reportContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `환자설명서_${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    // X-ray 이미지들도 별도로 다운로드
+    if (patientData.xray.images.length > 0) {
+      patientData.xray.images.forEach((file, index) => {
+        const imageUrl = URL.createObjectURL(file);
+        const imageA = document.createElement('a');
+        imageA.href = imageUrl;
+        imageA.download = `X-ray_${index + 1}_${file.name}`;
+        document.body.appendChild(imageA);
+        imageA.click();
+        document.body.removeChild(imageA);
+        URL.revokeObjectURL(imageUrl);
+      });
+      
+      alert(`설명서와 함께 X-ray 이미지 ${patientData.xray.images.length}장이 다운로드됩니다.`);
+    }
+  };
+
   const generatePatientReport = () => {
     const { selectedAreas, areaSymptoms } = patientData.symptoms;
 
@@ -426,6 +472,17 @@ ${patientData.anatomicalSelection.join(', ')}`;
 영상검사: X-ray 촬영 (${patientData.xray.images.length}장)`;
     }
 
+    // X-ray 첨부파일 목록 생성
+    let attachmentText = '';
+    if (patientData.xray.images.length > 0) {
+      attachmentText = `
+
+첨부파일:
+${patientData.xray.images.map((file, index) => 
+  `${index + 1}. ${file.name} (X-ray 이미지)`
+).join('\n')}`;
+    }
+
     let treatmentText = '';
     if (patientData.treatment.selected.length > 0) {
       const treatmentPrecautions = {
@@ -457,7 +514,7 @@ ${candidateDiseases.filter(d => d.code !== diagnosisCode).map(d => `${d.code} - 
 
 증상: ${symptomsText}${anatomicalText}${examText}${imagingText}${treatmentText}
 
-진단: ${diagnosisCode ? `${diagnosisCode} - ` : ''}${diagnosis}${candidatesText}
+진단: ${diagnosisCode ? `${diagnosisCode} - ` : ''}${diagnosis}${candidatesText}${attachmentText}
 
 주의사항:
 - 처방받은 약물 복용 시 주의사항을 지켜주세요
@@ -643,7 +700,15 @@ ${candidateDiseases.filter(d => d.code !== diagnosisCode).map(d => `${d.code} - 
 
           {/* X-Ray 업로드 섹션 */}
           <div className="xray-section">
-            <h3>X-ray 업로드</h3>
+            <div className="xray-header">
+              <h3>X-ray 업로드</h3>
+              {patientData.xray.images.length > 0 && (
+                <div className="attachment-status">
+                  <span className="attachment-icon">📎</span>
+                  <span className="attachment-count">{patientData.xray.images.length}개 파일이 설명서에 첨부됩니다</span>
+                </div>
+              )}
+            </div>
             <div className="xray-upload">
               <input
                 type="file"
@@ -659,9 +724,12 @@ ${candidateDiseases.filter(d => d.code !== diagnosisCode).map(d => `${d.code} - 
               />
               <div className="xray-thumbnails">
                 {patientData.xray.images.map((file, index) => (
-                  <div key={index} className="xray-thumbnail">
+                  <div key={index} className="xray-thumbnail" onClick={() => handleXrayThumbnailClick(file)}>
                     <img src={URL.createObjectURL(file)} alt={`X-ray ${index + 1}`} />
                     <p>{file.name}</p>
+                    <div className="attachment-indicator">
+                      <span className="attachment-badge">첨부됨</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -965,7 +1033,7 @@ ${candidateDiseases.filter(d => d.code !== diagnosisCode).map(d => `${d.code} - 
               />
               <div className="report-actions">
                 <button onClick={() => setShowPreview(true)}>미리보기</button>
-                <button>PDF 내보내기</button>
+                <button onClick={handlePDFExport}>PDF 내보내기</button>
                 <button>SMS 전송</button>
                 <button>이메일 전송</button>
               </div>
@@ -987,7 +1055,27 @@ ${candidateDiseases.filter(d => d.code !== diagnosisCode).map(d => `${d.code} - 
             </div>
             <div className="preview-footer">
               <button onClick={() => setShowPreview(false)}>닫기</button>
-              <button>PDF 내보내기</button>
+              <button>SMS 전송</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* X-ray 이미지 모달 */}
+      {showXrayModal && selectedXrayImage && (
+        <div className="xray-modal" onClick={closeXrayModal}>
+          <div className="xray-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="xray-modal-header">
+              <h3>X-ray 이미지</h3>
+              <button className="close-btn" onClick={closeXrayModal}>×</button>
+            </div>
+            <div className="xray-modal-body">
+              <img 
+                src={URL.createObjectURL(selectedXrayImage)} 
+                alt="X-ray 확대 이미지" 
+                className="xray-modal-image"
+              />
+              <p className="xray-modal-filename">{selectedXrayImage.name}</p>
             </div>
           </div>
         </div>
