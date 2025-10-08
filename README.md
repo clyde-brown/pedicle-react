@@ -19,14 +19,14 @@
 
 ### 설치 및 실행
 ```bash
-# 1. 프로젝트 클론
-git clone https://github.com/clyde-brown/pedicle-react.git
+# 1. 압축파일 해제 후 프로젝트 폴더로 이동
 cd pedicle-react
 
-# 2. 의존성 설치
-npm install
+# 2. 자동 설치 및 실행 (권장)
+bash install.sh
 
-# 3. 개발 서버 실행
+# 또는 수동 설치
+npm install
 npm start
 ```
 

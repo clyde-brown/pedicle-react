@@ -1,5 +1,5 @@
 @echo off
-REM Pedicle React 자동 설치 스크립트 (Windows)
+REM Pedicle React 자동 설치 및 실행 스크립트 (Windows)
 REM 사용법: install.bat
 
 echo 🏥 Pedicle React 설치를 시작합니다...
@@ -23,18 +23,6 @@ REM npm 버전 표시
 echo ✅ npm 확인됨
 npm --version
 
-REM Git 설치 확인
-git --version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo ❌ Git이 설치되어 있지 않습니다.
-    echo https://git-scm.com/download/win 에서 Git을 다운로드하여 설치해주세요.
-    pause
-    exit /b 1
-)
-
-echo ✅ Git 확인됨
-git --version
-
 echo.
 
 REM 의존성 설치
@@ -55,14 +43,26 @@ echo.
 echo 🎉 설치가 완료되었습니다!
 echo =======================================
 echo.
-echo 🚀 개발 서버를 시작하려면:
-echo   npm start
-echo.
-echo 🌐 브라우저에서 다음 주소로 접속:
-echo   http://localhost:3000
-echo.
-echo 📖 자세한 사용법은 README.md를 참조하세요.
-echo.
-echo ❓ 문제가 발생하면 INSTALLATION.md를 확인하세요.
-echo.
-pause
+
+REM 자동으로 서버 시작할지 묻기
+set /p choice="지금 개발 서버를 시작하시겠습니까? (Y/n): "
+if /i "%choice%"=="n" (
+    echo 🚀 개발 서버를 시작하려면:
+    echo   npm start
+    echo.
+    echo 🌐 브라우저에서 다음 주소로 접속:
+    echo   http://localhost:3000
+    echo.
+    echo 📖 자세한 사용법은 README.md를 참조하세요.
+    echo.
+    echo ❓ 문제가 발생하면 INSTALLATION.md를 확인하세요.
+    echo.
+    pause
+) else (
+    echo 🚀 개발 서버를 시작합니다...
+    echo 브라우저에서 http://localhost:3000 으로 접속하세요.
+    echo.
+    echo 서버를 중지하려면 Ctrl+C를 누르세요.
+    echo.
+    npm start
+)

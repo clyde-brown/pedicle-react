@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Pedicle React 자동 설치 스크립트 (macOS/Linux)
+# Pedicle React 자동 설치 및 실행 스크립트 (macOS/Linux)
 # 사용법: bash install.sh
 
 echo "🏥 Pedicle React 설치를 시작합니다..."
@@ -33,14 +33,6 @@ fi
 echo "✅ Node.js $(node --version) 확인됨"
 echo "✅ npm $(npm --version) 확인됨"
 
-# Git 설치 확인
-if ! command -v git &> /dev/null; then
-    echo "❌ Git이 설치되어 있지 않습니다."
-    echo "Git을 설치해주세요: https://git-scm.com/downloads"
-    exit 1
-fi
-
-echo "✅ Git $(git --version | cut -d' ' -f3) 확인됨"
 echo ""
 
 # 의존성 설치
@@ -59,12 +51,25 @@ echo ""
 echo "🎉 설치가 완료되었습니다!"
 echo "======================================="
 echo ""
-echo "🚀 개발 서버를 시작하려면:"
-echo "  npm start"
-echo ""
-echo "🌐 브라우저에서 다음 주소로 접속:"
-echo "  http://localhost:3000"
-echo ""
-echo "📖 자세한 사용법은 README.md를 참조하세요."
-echo ""
-echo "❓ 문제가 발생하면 INSTALLATION.md를 확인하세요."
+
+# 자동으로 서버 시작할지 묻기
+read -p "지금 개발 서버를 시작하시겠습니까? (Y/n): " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Nn]$ ]]; then
+    echo "🚀 개발 서버를 시작하려면:"
+    echo "  npm start"
+    echo ""
+    echo "🌐 브라우저에서 다음 주소로 접속:"
+    echo "  http://localhost:3000"
+    echo ""
+    echo "📖 자세한 사용법은 README.md를 참조하세요."
+    echo ""
+    echo "❓ 문제가 발생하면 INSTALLATION.md를 확인하세요."
+else
+    echo "🚀 개발 서버를 시작합니다..."
+    echo "브라우저에서 http://localhost:3000 으로 접속하세요."
+    echo ""
+    echo "서버를 중지하려면 Ctrl+C를 누르세요."
+    echo ""
+    npm start
+fi
